@@ -5,11 +5,28 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from "axios";
+
+const storeData = async (token, refreshToken) => {
+    try {
+        await AsyncStorage.setItem('@token', token);
+        await AsyncStorage.setItem('@refreshToken', refreshToken);
+    } catch (e) {
+        console.log(e);
+    }
+}
 
 const Login = ({nav}) => {
 
     const [sv1, ssv1] = useState(true);
     const [sv2, ssv2] = useState(faEyeSlash);
+
+    const [tv1, stv1] = useState('');
+    const [tv2, stv2] = useState('');
+
+    const [cti1, scti1] = useState(0);
+    const [cti2, scti2] = useState(0);
 
     const change = () => {
         switch (sv2) {
@@ -28,10 +45,33 @@ const Login = ({nav}) => {
         nav.navigate('Register')
     }
 
-    const ingresar = () => {
-        nav.navigate('Dashboard')
+    const ingresar = async () => {
+        var errors=0;
+        if(tv1.replace(/\s/g,'')===''){
+            errors++;
+            scti1(2);
+        }
+        if(tv2.replace(/\s/g,'')===''){
+            errors++;
+            scti2(2)
+        }
+        if(errors>0){
+            alert('Debe llenar todos los espacios.')
+        } else {
+            try {
+                var result;
+                const res = await axios.post('http://10.0.2.2:3088/auth/login', { "email": tv1, "password":tv2 });
+                result = res.data;
+                alert(result.msg);
+                storeData(result.data.token, result.data.refreshToken);
+                if(result.success){
+                    nav.navigate('Dashboard');
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        }
     }
-
 
     return (
         <KeyboardAwareScrollView>
@@ -43,14 +83,14 @@ const Login = ({nav}) => {
                         <View style={styles.container2}>
                             <Text style={{fontSize:wp('7.75%'), color:"#808080", fontFamily:"Poppins-ExtraBold", marginVertical:hp('2%')}}>Ingresar</Text>
                             <View style={{marginVertical:hp('0.5%')}}>
-                                <Text style={{color:"#808080", fontSize:wp('3.1%'), marginLeft:wp('1.5%'), fontFamily:'Poppins-Regular'}}>Email o Teléfono</Text>
-                                <TextInput style={styles.input}/>
+                                <Text style={{color:"#808080", fontSize:wp('3.1%'), marginLeft:wp('1.5%'), fontFamily:'Poppins-Regular'}}>Email o teléfono</Text>
+                                <TextInput style={([styles.input, {borderColor:'#ff5b5b', borderWidth:cti1}])} value={tv1} onChangeText={(textValue) => {stv1(textValue), scti1(0)}}/>
                             </View>
                             <View style={{marginVertical:hp('0.5%')}}>
                                 <Text style={{color:"#808080", fontSize:wp('3.1%'), marginLeft:wp('1.5%'), fontFamily:'Poppins-Regular'}}>Contraseña</Text>
                                 <View style={{flexDirection:"row"}}>
-                                    <TextInput style={styles.inputPass} secureTextEntry={sv1}/>
-                                    <View style={styles.iconBack}>
+                                    <TextInput style={([styles.inputPass, {borderWidth:cti2}])} secureTextEntry={sv1} value={tv2} onChangeText={(textValue) => {stv2(textValue), scti2(0)}}/>
+                                    <View style={([styles.iconBack, {borderWidth:cti2}])}>
                                         <TouchableWithoutFeedback onPress={change}>
                                             <FontAwesomeIcon icon={ sv2 } size={hp('2.5%')} style={styles.icon}/>
                                         </TouchableWithoutFeedback>
@@ -88,7 +128,7 @@ const styles = StyleSheet.create({
     },
     container2:{
         flex:1,
-        width:wp('100%'),
+        width:wp('110%'),
         justifyContent:"center",
         alignItems:"center",
         backgroundColor:"#e5e5e5",
@@ -109,11 +149,15 @@ const styles = StyleSheet.create({
         height:hp('4.4%'),
         width:wp('67%'),
         color:"#6dd8cb",
-        backgroundColor:"white",
         borderTopLeftRadius:3,
         borderBottomLeftRadius:3,
         fontFamily:'Poppins-Medium',
-        paddingVertical:0
+        paddingVertical:0,
+        backgroundColor:'white',
+        borderRightWidth:0,
+        borderBottomColor:'#ff5b5b',
+        borderTopColor:'#ff5b5b',
+        borderLeftColor:'#ff5b5b'
     },
     button: {
         backgroundColor: 'white',
@@ -125,8 +169,8 @@ const styles = StyleSheet.create({
     },
     icon:{
         backgroundColor:"white",
-        marginHorizontal:wp('2%'),
-        marginVertical:hp('1%'),
+        marginHorizontal:wp('1.5%'),
+        marginVertical:hp('0.8%'),
         color:'#6dd8cb'
     },
     iconBack:{
@@ -134,7 +178,11 @@ const styles = StyleSheet.create({
         borderBottomRightRadius:3,
         width:wp('8.8%'),
         height:hp('4.4%'),
-        backgroundColor:"white"
+        backgroundColor:"white",
+        borderRightColor:'#ff5b5b',
+        borderBottomColor:'#ff5b5b',
+        borderTopColor:'#ff5b5b',
+        borderLeftWidth:0
     }
 })
 

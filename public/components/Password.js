@@ -6,8 +6,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+;import axios from "axios";
 
-const Password = ({nav}) => {
+const Password = ({route, nav}) => {
 
     const back = () => {
         nav.navigate('Register');
@@ -18,6 +19,12 @@ const Password = ({nav}) => {
     
     const [sv3, ssv3] = useState(true);
     const [sv4, ssv4] = useState(faEyeSlash);
+
+    const [tv1, stv1] = useState('');
+    const [tv2, stv2] = useState('');
+
+    const [ct1, sct1] = useState(0);
+    const [ct2, sct2] = useState(0);
 
     const change = () => {
         switch (sv2) {
@@ -46,8 +53,45 @@ const Password = ({nav}) => {
 
     }
 
-    const regHuella = () => {
-        nav.navigate('RegHuella')
+    const regHuella = async () => {
+        var errors=0;
+        if(tv1.replace(/\s/g,'')===''){
+            errors++;
+            sct1(2);
+        }
+        if(tv2.replace(/\s/g,'')===''){
+            errors++;
+            sct2(2);
+        }
+        if(tv1!==tv2){
+            errors++;
+        }
+        if(errors>0){
+            if(tv1!==tv2){
+                alert('Las contraseñas no coinciden')
+            } else {
+                alert('Debe llenar todos los espacios')
+            }
+        }
+        else{
+            try {
+            var result;
+            const res = await axios.post('http://10.0.2.2:3088/auth/register', { 
+                "name": route.params.name, 
+                "lastname":route.params.lastname,
+                "secondLastname":route.params.secondLastname,
+                "email":route.params.email,
+                "phone":route.params.phone,
+                "password":tv1});
+            result = res.data;
+            alert(result.msg)
+                if(result.success){ 
+                nav.navigate('RegHuella')
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        }
     }
     
     const volReg = () => {
@@ -71,8 +115,8 @@ const Password = ({nav}) => {
                         <View style={{marginVertical:hp('1.5%')}}>
                             <Text style={{color:"#808080", fontSize:wp('3.1%'), marginLeft:wp('1.5%'), fontFamily:'Poppins-Regular'}}>Contraseña</Text>
                             <View style={{marginVertical:hp('0.2%'), flexDirection:"row"}}>
-                                <TextInput style={styles.inputPass} secureTextEntry={sv1}/>
-                                <View style={styles.iconBack}>
+                                <TextInput style={([styles.inputPass, {borderWidth:ct1}])} secureTextEntry={sv1} value={tv1} onChangeText={(textValue) => {stv1(textValue), sct1(0)}}/>
+                                <View style={([styles.iconBack,{borderWidth:ct1}])}>
                                     <TouchableWithoutFeedback onPress={change}>
                                         <FontAwesomeIcon icon={ sv2 } size={hp('3%')} style={styles.icon}/>
                                     </TouchableWithoutFeedback>
@@ -82,8 +126,8 @@ const Password = ({nav}) => {
                         <View style={{marginVertical:hp('1.5%')}}>
                             <Text style={{color:"#808080", fontSize:wp('3.1%'), marginLeft:wp('1.5%'), fontFamily:'Poppins-Regular'}}>Repetir contraseña</Text>
                             <View style={{marginVertical:hp('0.2%'), flexDirection:"row"}}>
-                                <TextInput style={styles.inputPass} secureTextEntry={sv3}/>
-                                <View style={styles.iconBack}>
+                                <TextInput style={([styles.inputPass, {borderWidth:ct2}])} secureTextEntry={sv3} value={tv2} onChangeText={(textValue) => {stv2(textValue), sct2(0)}}/>
+                                <View style={([styles.iconBack, {borderWidth:ct2}])}>
                                     <TouchableWithoutFeedback onPress={change2}>
                                         <FontAwesomeIcon icon={ sv4 } size={hp('3%')} style={styles.icon}/>
                                     </TouchableWithoutFeedback>
@@ -114,7 +158,7 @@ const styles = StyleSheet.create({
     },
     container2:{
         flex:1.5,
-        width:('100%'),
+        width:('110%'),
         justifyContent:"center",
         alignItems:"center",
         backgroundColor:"#e5e5e5",
@@ -129,8 +173,8 @@ const styles = StyleSheet.create({
     },
     icon:{
         backgroundColor:"white",
-        marginHorizontal:wp('2.4%'),
-        marginVertical:hp('2%'),
+        marginHorizontal:wp('2%'),
+        marginVertical:hp('1.55%'),
         color:'#6dd8cb'
     },
     inputPass:{
@@ -141,14 +185,22 @@ const styles = StyleSheet.create({
         borderTopLeftRadius:3,
         borderBottomLeftRadius:3,
         fontFamily:'Poppins-Medium',
-        paddingVertical:0
+        paddingVertical:0,
+        borderRightWidth:0,
+        borderTopColor:'#ff5b5b',
+        borderLeftColor:'#ff5b5b',
+        borderBottomColor:'#ff5b5b'
     },
     iconBack:{
         borderTopRightRadius:3,
         borderBottomRightRadius:3,
         width:wp('11.11%'),
         height:hp('6.6%'),
-        backgroundColor:"white"
+        backgroundColor:"white",
+        borderLeftWidth:0,
+        borderTopColor:'#ff5b5b',
+        borderRightColor:'#ff5b5b',
+        borderBottomColor:'#ff5b5b'
     }
 })
 

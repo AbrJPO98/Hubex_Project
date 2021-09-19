@@ -2,9 +2,11 @@ import React from "react";
 import { Text, View } from "react-native";
 
 const About = () => {
-    return(
-        <Text>About Screen</Text>
-    );
+        return(
+            <View>
+                <Text>Se pudo cargar</Text>
+            </View>
+        );
 }
 
 export default About;

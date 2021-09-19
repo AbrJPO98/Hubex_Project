@@ -37,10 +37,10 @@ const Reg = ({navigation}) => {
   )
 }
 
-const Pass = ({navigation}) => {
+const Pass = ({route, navigation}) => {
   return(
     <View style={styles.container}>
-      <Password nav={navigation}/>
+      <Password nav={navigation} route={route}/>
     </View>
   )
 }

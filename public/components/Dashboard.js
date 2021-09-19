@@ -7,10 +7,26 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import About from "./About";
 import Profile from "./Profile";
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import axios from "axios";
 
 const Drawer = createDrawerNavigator();
 
 const Abt = () => {
+
+    /*const validarToken = () => {
+        try {
+            var result;
+            const res = await axios.post('http://10.0.2.2:3088/auth/token', { "email": tv1, "password":tv2 });
+            result = res.data;
+            storeData(result.data.token, result.data.refreshToken);
+            if(result.success){
+                nav.navigate('Dashboard');
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }*/
+
     return(
         <View style={{flex:1}}>
             <About />
